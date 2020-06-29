@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import GoogleMapReact from 'google-map-react';
 import axios from 'axios';
-import './marker.css';
+import './pin.css';
 import { geolocated } from "react-geolocated";
 
 const Marker = () => <div className="pin"></div>;
@@ -56,7 +56,6 @@ class SimpleMap extends Component {
           />
         ));
         this.setState({markers: newMarkers, loading: false});
-        res.data.map((location) => console.log(location));
       })
   }
 
