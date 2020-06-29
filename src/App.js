@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import GoogleMapReact from 'google-map-react';
 import axios from 'axios';
 import './marker.css';
+import { geolocated } from "react-geolocated";
 
 const Marker = () => <div className="pin"></div>;
 
 class SimpleMap extends Component {
   static defaultProps = {
+    //Default to Berlin
     center: {
       lat: 52.52,
       lng: 13.40
@@ -18,12 +20,7 @@ class SimpleMap extends Component {
     super();
     this.fetchMarkers = this.fetchMarkers.bind(this);
     this.state = {
-      markers: [
-        <Marker
-          lat={52.52}
-          lng={13.40}
-        />
-      ],
+      markers: [],
       loading: false
     };
   }
@@ -31,18 +28,19 @@ class SimpleMap extends Component {
   componentDidMount() {
     if (this.state.loading) { return; }
     this.setState({loading: true});
-    axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.52&longitude=13.40&distance=10&distanceunit=KM`)
-      .then(res => {
-        let newMarkers = [];
-        res.data.map((location) => newMarkers.push(
-          <Marker
-            lat={location.AddressInfo.Latitude}
-            lng={location.AddressInfo.Longitude}
-          />
-        ));
-        this.setState({markers: newMarkers, loading: false});
-        res.data.map((location) => console.log(location));
-      })
+
+    let latitude = this.props.center.lat;
+    let longitude = this.props.center.lng;
+    if (this.props.coords) {
+      latitude = this.props.coords.latitude;
+      longitude = this.props.coords.longitude;
+    }
+    this.fetchMarkers({
+      center: {
+        lat: () => {return latitude;},
+        lng: () => {return longitude;}
+      }
+    });
   }
 
   fetchMarkers(map) {
@@ -55,7 +53,6 @@ class SimpleMap extends Component {
           <Marker
             lat={location.AddressInfo.Latitude}
             lng={location.AddressInfo.Longitude}
-            text="My Marker"
           />
         ));
         this.setState({markers: newMarkers, loading: false});
@@ -86,4 +83,9 @@ class SimpleMap extends Component {
   }
 }
 
-export default SimpleMap;
+export default geolocated({
+    positionOptions: {
+        enableHighAccuracy: false,
+    },
+    userDecisionTimeout: 5000,
+})(SimpleMap);
