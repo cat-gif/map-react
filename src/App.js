@@ -17,16 +17,20 @@ class SimpleMap extends Component {
   constructor() {
     super();
     this.fetchMarkers = this.fetchMarkers.bind(this);
-    this.state = {markers: [
-      <Marker
-        lat={52.52}
-        lng={13.40}
-        text="My Marker"
-      />
-    ]};
+    this.state = {
+      markers: [
+        <Marker
+          lat={52.52}
+          lng={13.40}
+        />
+      ],
+      loading: false
+    };
   }
 
   componentDidMount() {
+    if (this.state.loading) { return; }
+    this.setState({loading: true});
     axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.52&longitude=13.40&distance=10&distanceunit=KM`)
       .then(res => {
         let newMarkers = [];
@@ -34,15 +38,16 @@ class SimpleMap extends Component {
           <Marker
             lat={location.AddressInfo.Latitude}
             lng={location.AddressInfo.Longitude}
-            text="My Marker"
           />
         ));
-        this.setState({markers: newMarkers});
+        this.setState({markers: newMarkers, loading: false});
         res.data.map((location) => console.log(location));
       })
   }
 
   fetchMarkers(map) {
+    if (this.state.loading) { return; }
+    this.setState({loading: true});
     axios.get('https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=' + map.center.lat() +  '&longitude=' + map.center.lng() + '&distance=10&distanceunit=KM')
       .then(res => {
         let newMarkers = [];
@@ -53,23 +58,29 @@ class SimpleMap extends Component {
             text="My Marker"
           />
         ));
-        this.setState({markers: newMarkers});
+        this.setState({markers: newMarkers, loading: false});
         res.data.map((location) => console.log(location));
       })
   }
 
   render() {
+    let loading;
+    if (this.state.loading) {
+      loading = 'Loading...';
+    }
     return (
-      // Important! Always set the container height explicitly
-      <div style={{ height: '100vh', width: '100%' }}>
-        <GoogleMapReact
-          bootstrapURLKeys={{ key: 'AIzaSyD6T8zNeCCXnR0NhbSplOFvaHG6Jfa6X70' }}
-          defaultCenter={this.props.center}
-          defaultZoom={this.props.zoom}
-          onDrag={this.fetchMarkers}
-        >
-          {this.state.markers}
-        </GoogleMapReact>
+      <div>
+        <h1>{loading}</h1>
+        <div style={{ height: '100vh', width: '100%' }}>
+          <GoogleMapReact
+            bootstrapURLKeys={{ key: 'AIzaSyD6T8zNeCCXnR0NhbSplOFvaHG6Jfa6X70' }}
+            defaultCenter={this.props.center}
+            defaultZoom={this.props.zoom}
+            onDrag={this.fetchMarkers}
+          >
+            {this.state.markers}
+          </GoogleMapReact>
+        </div>
       </div>
     );
   }
