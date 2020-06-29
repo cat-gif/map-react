@@ -17,7 +17,7 @@ class SimpleMap extends Component {
     console.log('CAT1');
     axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.520008&longitude=13.404954&distance=10&distanceunit=KM`)
       .then(res => {
-        console.log('CAT2');
+        console.log(res);
       })
   }
 
