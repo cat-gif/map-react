@@ -2,22 +2,44 @@ import React, { Component } from 'react';
 import GoogleMapReact from 'google-map-react';
 import axios from 'axios';
 
-const AnyReactComponent = ({ text }) => <div>{text}</div>;
+const Marker = ({ text }) => <div style={{fontSize: "1.5em"}}>{text}</div>;
 
 class SimpleMap extends Component {
   static defaultProps = {
     center: {
-      lat: 59.95,
-      lng: 30.33
+      lat: 52.52,
+      lng: 13.40
     },
     zoom: 11
   };
 
+  constructor() {
+    super();
+    this.state = {markers: [
+      <Marker
+        lat={52.52}
+        lng={13.40}
+        text="My Marker"
+      />
+    ]};
+  }
+
   componentDidMount() {
-    console.log('CAT1');
-    axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.520008&longitude=13.404954&distance=10&distanceunit=KM`)
+    axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.52&longitude=13.40&distance=10&distanceunit=KM`)
       .then(res => {
-        console.log(res);
+        this.setState({markers: [
+          <Marker
+            lat={52.52}
+            lng={13.40}
+            text="My Marker"
+          />,
+          <Marker
+            lat={52.55}
+            lng={13.43}
+            text="My Marker 2"
+          />
+        ]});
+        res.data.map((location) => console.log(location));
       })
   }
 
@@ -31,11 +53,7 @@ class SimpleMap extends Component {
           defaultCenter={this.props.center}
           defaultZoom={this.props.zoom}
         >
-          <AnyReactComponent
-            lat={59.955413}
-            lng={30.337844}
-            text="My Marker"
-          />
+          {this.state.markers}
         </GoogleMapReact>
       </div>
     );
