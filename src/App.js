@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import GoogleMapReact from 'google-map-react';
 import axios from 'axios';
+import './marker.css';
 
-const Marker = ({ text }) => <div style={{fontSize: "1.5em"}}>{text}</div>;
+const Marker = () => <div className="pin"></div>;
 
 class SimpleMap extends Component {
   static defaultProps = {
@@ -10,11 +11,12 @@ class SimpleMap extends Component {
       lat: 52.52,
       lng: 13.40
     },
-    zoom: 11
+    zoom: 15
   };
 
   constructor() {
     super();
+    this.fetchMarkers = this.fetchMarkers.bind(this);
     this.state = {markers: [
       <Marker
         lat={52.52}
@@ -27,22 +29,34 @@ class SimpleMap extends Component {
   componentDidMount() {
     axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.52&longitude=13.40&distance=10&distanceunit=KM`)
       .then(res => {
-        this.setState({markers: [
+        let newMarkers = [];
+        res.data.map((location) => newMarkers.push(
           <Marker
-            lat={52.52}
-            lng={13.40}
+            lat={location.AddressInfo.Latitude}
+            lng={location.AddressInfo.Longitude}
             text="My Marker"
-          />,
-          <Marker
-            lat={52.55}
-            lng={13.43}
-            text="My Marker 2"
           />
-        ]});
+        ));
+        this.setState({markers: newMarkers});
         res.data.map((location) => console.log(location));
       })
   }
 
+  fetchMarkers(map) {
+    axios.get('https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=' + map.center.lat() +  '&longitude=' + map.center.lng() + '&distance=10&distanceunit=KM')
+      .then(res => {
+        let newMarkers = [];
+        res.data.map((location) => newMarkers.push(
+          <Marker
+            lat={location.AddressInfo.Latitude}
+            lng={location.AddressInfo.Longitude}
+            text="My Marker"
+          />
+        ));
+        this.setState({markers: newMarkers});
+        res.data.map((location) => console.log(location));
+      })
+  }
 
   render() {
     return (
@@ -52,6 +66,7 @@ class SimpleMap extends Component {
           bootstrapURLKeys={{ key: 'AIzaSyD6T8zNeCCXnR0NhbSplOFvaHG6Jfa6X70' }}
           defaultCenter={this.props.center}
           defaultZoom={this.props.zoom}
+          onDrag={this.fetchMarkers}
         >
           {this.state.markers}
         </GoogleMapReact>
