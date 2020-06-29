@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import GoogleMapReact from 'google-map-react';
+import axios from 'axios';
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
@@ -11,6 +12,15 @@ class SimpleMap extends Component {
     },
     zoom: 11
   };
+
+  componentDidMount() {
+    console.log('CAT1');
+    axios.get(`https://api.openchargemap.io/v3/poi/?output=json&countrycode=DE&maxresults=10&compact=true&verbose=false&latitude=52.520008&longitude=13.404954&distance=10&distanceunit=KM`)
+      .then(res => {
+        console.log('CAT2');
+      })
+  }
+
 
   render() {
     return (
